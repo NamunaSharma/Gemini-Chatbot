@@ -33,9 +33,9 @@ export default function HomePage() {
               key={idx}
               className={`${msg.role === "user" ? "text-right" : "text-left"}`}
             >
-              {/* <span className="block px-4 py-2 rounded-md bg-gray-700 inline-block max-w-xs">
+              <span className="block px-4 py-2 rounded-md bg-gray-700 inline-block max-w-xs">
                 {msg.content}
-              </span> */}
+              </span>
             </div>
           ))}
         </div>
