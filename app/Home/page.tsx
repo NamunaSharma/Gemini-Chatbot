@@ -41,14 +41,14 @@ export default function HomePage() {
         </div>
         <div className="w-full flex justify-start mb-2"></div>
         <div className="w-full">
-          <input
+          {/* <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             placeholder="Type your message here..."
             className="w-full p-2 border rounded-md"
-          />
+          /> */}
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2"
             onClick={sendMessage}
