@@ -61,8 +61,8 @@ export default function Home() {
           >
             Send
           </button>
-        {/* </div>
+        </div>
       </div>
-    </div> */}
+    </div>
   );
 }
