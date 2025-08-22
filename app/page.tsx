@@ -55,12 +55,12 @@ export default function Home() {
             placeholder="Ask something..."
             className="flex-grow px-4 py-2 rounded-md text-black"
           />
-          {/* <button
+          <button
             onClick={sendMessage}
             className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md"
           >
             Send
-          </button> */}
+          </button>
         </div>
       </div>
     </div>
