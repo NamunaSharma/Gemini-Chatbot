@@ -114,7 +114,7 @@ export default function HomePage() {
               </div>
             ))
           )}
-          <div ref={messagesEndRef} />
+          {/* <div ref={messagesEndRef} /> */}
         </div>
 
         {/* Input Area */}
