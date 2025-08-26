@@ -137,11 +137,11 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* {isLoading && (
+        {isLoading && (
           <div className="text-center text-gray-500 mt-2">
             AI is thinking...
           </div>
-        )} */}
+        )}
       </div>
     </div>
   );
