@@ -59,7 +59,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-blue-100 p-4">
       <div className="max-w-2xl mx-auto bg-amber-800 rounded-lg shadow-md p-4">
-        <h1 className="text-2xl font-bold text-center mb-4">AI Chat</h1>
+        {/* <h1 className="text-2xl font-bold text-center mb-4">AI Chat</h1> */}
 
         {/* Instruction Selector */}
         <div className="mb-4">
