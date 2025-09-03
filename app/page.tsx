@@ -65,8 +65,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen w-auto p-10 bg-white">
-      <h1 className="text-gray-500 text-2xl mb-2">Chatbot</h1>
-
       <div className="w-150 h-96 outline-solid rounded-sm p-6 bg-gray-600 overflow-y-scroll text-white">
         <select value={selectedFiles} onChange={handleChange}>
           {files.map((file) => (
