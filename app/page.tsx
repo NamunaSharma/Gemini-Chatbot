@@ -1,147 +1,112 @@
 "use client";
+import { useEffect, useState } from "react";
 
-import { useEffect, useState, useRef } from "react";
+// ✅ Interfaces should be declared outside the component
+interface FileItem {
+  id: string;
+  name: string;
+  description: string;
+}
 
-export default function HomePage() {
+export default function Home() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>(
     []
   );
   const [input, setInput] = useState("");
-  const [files, setFiles] = useState<string[]>([]);
-  const [selectedFile, setSelectedFile] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [files, setFiles] = useState<FileItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
+  const [selectedFiles, setSelectedFiles] = useState("IT_professional.txt");
 
-  // Fetch instruction files
   useEffect(() => {
-    fetch("http://localhost:8000/api/files")
-      .then((res) => res.json())
-      .then(setFiles)
-      .catch(console.error);
+    async function fetchData() {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/prompts/");
+        if (!res.ok) throw new Error("Failed to fetch data");
+        const data = await res.json();
+        setFiles(data);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
   }, []);
 
-  // Scroll to bottom when messages update
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  const handleChange = (event: any) => {
+    setSelectedFiles(event.target.value);
+    setMessages([]);
+  };
 
-  const sendMessage = async () => {
+  const sendMessages = async () => {
     if (!input.trim()) return;
+    const usermessage = { role: "user", content: input };
+    setMessages((prev) => [...prev, usermessage]);
+    setInput(""); // ✅ Clear input properly
 
-    const userMessage = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
+    const response = await fetch("http://127.0.0.1:8000/api/chat/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: input, filename: selectedFiles }),
+    });
 
-    try {
-      const res = await fetch("http://localhost:8000/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: input, filename: selectedFile }),
-      });
-      const data = await res.json();
-      const botMessage = { role: "assistant", content: data.response };
-      setMessages((prev) => [...prev, botMessage]);
-    } catch (err) {
-      console.error(err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
+    const data = await response.json();
+    const botmessage = { role: "assistant", content: data.message }; // ✅ lowercase
+    setMessages((prev) => [...prev, botmessage]);
+  };
+
+  const handleKeyDown = (event: any) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      sendMessages();
     }
   };
 
   return (
-    <div className="min-h-screen bg-blue-100 p-4">
-      <div className="max-w-2xl mx-auto bg-amber-800 rounded-lg shadow-md p-4">
-        <h1 className="text-2xl font-bold text-center mb-4">AI Chat</h1>
+    <div className="min-h-screen w-auto p-10 bg-white">
+      <h1 className="text-gray-500 text-2xl mb-2">Chatbot</h1>
 
-        {/* Instruction Selector */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">
-            Select AI Personality:
-          </label>
-          <select
-            value={selectedFile}
-            onChange={(e) => setSelectedFile(e.target.value)}
-            className="w-full p-2 border rounded-md"
+      <div className="w-150 h-96 outline-solid rounded-sm p-6 bg-gray-600 overflow-y-scroll text-white">
+        <select value={selectedFiles} onChange={handleChange}>
+          {files.map((file) => (
+            <option key={file.id} value={file.name}>
+              {file.name}
+            </option>
+          ))}
+        </select>
+
+        {messages.map((msg, id) => (
+          <div
+            key={id}
+            className={
+              msg.role === "user"
+                ? "text-right mb-2 mt-8 leading-relaxed"
+                : "text-left mt-8 leading-relaxed w-[80%]"
+            }
           >
-            <option value="">Default Assistant</option>
-            {files.map((file) => (
-              <option key={file} value={file}>
-                {file.replace(".txt", "")}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Active Instruction Indicator */}
-        {selectedFile && (
-          <p className="text-sm text-gray-500 mb-2">
-            Using instruction:{" "}
-            <strong>{selectedFile.replace(".txt", "")}</strong>
-          </p>
-        )}
-
-        {/* Chat Messages */}
-        <div className="h-96 overflow-y-auto border rounded-lg p-4 mb-4 bg-gray-50">
-          {messages.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
-              Start a conversation by typing a message below
-            </div>
-          ) : (
-            messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`mb-3 ${
-                  msg.role === "user" ? "text-right" : "text-left"
-                }`}
-              >
-                <span
-                  className={`inline-block px-4 py-2 rounded-lg ${
-                    msg.role === "user"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-800"
-                  }`}
-                >
-                  {msg.content}
-                </span>
-              </div>
-            ))
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input Area */}
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-            placeholder="Type your message..."
-            className="flex-1 p-2 border rounded-md"
-            disabled={isLoading}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={isLoading || !input.trim()}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md disabled:bg-gray-300"
-          >
-            Send
-          </button>
-        </div>
-
-        {isLoading && (
-          <div className="text-center text-gray-500 mt-2">
-            AI is thinking...
+            <span className="text-white text-md rounded-sm p-3 leading-8 w-[50%]">
+              {msg.content}
+            </span>
           </div>
-        )}
+        ))}
+      </div>
+
+      <div className="flex mt-4 space-x-8">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="enter the prompt"
+          className="w-115 h-auto text-black p-3 outline outline-gray-500 rounded-sm overflow-y-scroll"
+        />
+        <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded"
+          onClick={sendMessages}
+        >
+          Click Me
+        </button>
       </div>
     </div>
   );
