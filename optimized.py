@@ -228,13 +228,6 @@ async def chat(request: Request, db: Session = Depends(get_db)):
         combined = list(dict.fromkeys(dense_chunks[:5] + sparse_chunks[:5]))
         top_chunks = combined[:3]
 
-    # --- Optional file instruction ---
-    # file_instruction = ""
-    # if filename:
-    #     item = db.query(FileData).filter(FileData.name == filename).first()
-    #     if item:
-    #         file_instruction = item.description
-
     # --- Final system instruction ---
     system_instruction = f"{top_chunks}\n\n{texts}"
 
